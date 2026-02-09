@@ -5,12 +5,14 @@ from bookings.serializers import AppointmentSerializer
 
 class PatientSerializer(serializers.ModelSerializer):
     appointments = AppointmentSerializer(many=True, read_only=True)
+    age = serializers.SerializerMethodField()
     
     class Meta:
         model = Patient
         fields = [
             'first_name',
             'last_name',
+            'age',
             'date_of_birth',
             'contact_number',
             'email',
@@ -18,6 +20,12 @@ class PatientSerializer(serializers.ModelSerializer):
             'medical_history',
             'appointments',
         ]
+
+    def get_age(self, obj):
+        age_td = date.today() - obj.date_of_birth
+        age = age_td.days // 365
+        return f"{age} años"
+
     def validate_email(self, value):
         if "@example.com" in value:
             return value

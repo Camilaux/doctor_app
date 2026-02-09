@@ -1,8 +1,11 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from django.shortcuts import get_object_or_404
 from .permissions import IsDoctor
+from bookings.serializers import AppointmentSerializer
+from bookings.models import Appointment
 
 from .serializers import DoctorSerializer, DepartmentSerializer, DoctorAvailabilitySerializer, MedicalNoteSerializer
 from .models import Doctor, Department, DoctorAvailability, MedicalNote
@@ -25,6 +28,30 @@ class DoctorViewSet(viewsets.ModelViewSet):
         doctor.is_on_vacation = False
         doctor.save()
         return Response({'status': 'El doctor ya no está de vacaciones'})
+    
+    @action(['POST', 'GET'], detail=True, serializer_class=AppointmentSerializer)
+    def appointments(self, request, pk):
+        doctor = self.get_object()
+        
+        if request.method == 'POST':
+            data = request.data.copy()
+            data['doctor'] = doctor.id
+            serializer = AppointmentSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        if request.method == 'GET':
+            appointments = Appointment.objects.filter(doctor=doctor)
+            serializer = AppointmentSerializer(appointments, many=True)
+            return Response(serializer.data)
+
+    @action(['DELETE'], detail=True, url_path=r'appointments/(?P<appointment_id>\d+)/delete')
+    def delete_appointment(self, request, pk, appointment_id=None):
+        doctor = self.get_object()
+        appointment = get_object_or_404(Appointment, pk=appointment_id, doctor=doctor)
+        appointment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.all()
