@@ -1,5 +1,5 @@
-from .serializers import PatientSerializer
-from .models import Patient
+from .serializers import PatientSerializer, InsuranceSerializer, MedicalRecordSerializer
+from .models import Patient, Insurance, MedicalRecord
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -28,3 +28,36 @@ class DetailPatientView(RetrieveUpdateDestroyAPIView):
     allowed_methods = ['GET','PUT','DELETE']
     serializer_class = PatientSerializer
     queryset = Patient.objects.all()
+
+class ListInsurancesView(ListAPIView, CreateAPIView):
+    """
+    Obtiene la lista de seguros asociados a un paciente específico.
+    """
+
+    allowed_methods = ['GET','POST']
+    serializer_class = InsuranceSerializer
+    queryset = Insurance.objects.all()
+
+class DetailInsuranceView(RetrieveUpdateDestroyAPIView):
+    """
+    Permite obtener, actualizar o eliminar un seguro específico utilizando su ID (pk).
+    """
+    allowed_methods = ['GET','PUT','DELETE']
+    serializer_class = InsuranceSerializer
+    queryset = Insurance.objects.all()
+
+class ListMedicalRecordsView(ListAPIView, CreateAPIView):
+    """
+    Obtiene la lista de registros médicos asociados a un paciente específico.
+    """
+    allowed_methods = ['GET','POST']
+    serializer_class = MedicalRecordSerializer
+    queryset = MedicalRecord.objects.all()
+
+class DetailMedicalRecordView(RetrieveUpdateDestroyAPIView):
+    """
+    Permite obtener, actualizar o eliminar un registro médico específico utilizando su ID (pk).
+    """
+    allowed_methods = ['GET','PUT','DELETE']
+    serializer_class = MedicalRecordSerializer
+    queryset = MedicalRecord.objects.all()
