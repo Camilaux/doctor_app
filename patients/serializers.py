@@ -1,12 +1,23 @@
 from datetime import date
 from rest_framework import serializers
 from .models import Patient, Insurance, MedicalRecord
+from bookings.serializers import AppointmentSerializer
 
 class PatientSerializer(serializers.ModelSerializer):
+    appointments = AppointmentSerializer(many=True, read_only=True)
+    
     class Meta:
         model = Patient
-        fields = '__all__'  # esto es para incluir todos los campos del modelo Patient, puedes especificar campos específicos si lo deseas
-    
+        fields = [
+            'first_name',
+            'last_name',
+            'date_of_birth',
+            'contact_number',
+            'email',
+            'address',
+            'medical_history',
+            'appointments',
+        ]
     def validate_email(self, value):
         if "@example.com" in value:
             return value
